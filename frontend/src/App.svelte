@@ -1,13 +1,13 @@
 <script lang="ts">
   import { Router, Route } from "svelte-navigator";
 
-  import TopHeader from "./layout_components/top_header.svelte";
-  import Footer from "./layout_components/footer.svelte";
+  import TopHeader from "./layout_components/top_header.layout.svelte";
+  import Footer from "./layout_components/footer.layout.svelte";
 
-  import HomePage from "./layout_components/pages/home_page.svelte";
-  import ClientPage from "./layout_components/pages/client_page.svelte";
-  import QueuePage from "./layout_components/pages/queue_page.svelte";
-  import GamePage from "./layout_components/pages/game_page.svelte";
+  import HomePage from "./layout_components/pages/home.page.svelte";
+  import JoinPage from "./layout_components/pages/join.page.svelte";
+  import QueuePage from "./layout_components/pages/queue.page.svelte";
+  import GamePage from "./layout_components/pages/game.page.svelte";
 </script>
 
 <Router>
@@ -20,8 +20,11 @@
     />
     <div id="content" class="flex flex-all">
       <Route path="/" component={HomePage} />
-      <Route path="/join" component={ClientPage} />
+      <Route path="/join" component={JoinPage} />
       <Route path="/queue" component={QueuePage} />
+      <Route path="/queue/:code" let:params>
+        <QueuePage code={params.code} />
+      </Route>
       <Route path="/game">
         <GamePage fieldSizeX={7} fieldSizeY={12} />
       </Route>

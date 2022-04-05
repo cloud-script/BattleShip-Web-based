@@ -1,7 +1,7 @@
 <script lang="ts">
   import Field from "../../user_components/Field.svelte";
 
-  import { randomInt } from "../../utility/Utility";
+  import { randomInt } from "./../../utility/utilities";
   import { Ship, DIRECTION_CONSTANTS } from "../../Types";
   import type { Direction, Positions } from "../../Types";
 

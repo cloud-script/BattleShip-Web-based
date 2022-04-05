@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { Link } from "svelte-navigator";
   import type { HeaderItems_obj } from "../Types";
-  import VrLine from "./Vr_line.svelte";
+  import VrLine from "./vr_line.layout.svelte";
 
   export let Items: Array<HeaderItems_obj>;
 </script>
@@ -9,18 +10,18 @@
   <div class="flex flex-all gap-3" style="">
     <span class="iconify" data-icon="fluent:vehicle-ship-20-filled" />
     <VrLine width="2.5px" height="35px" borderRadius="10px" color="#abaebf" />
-    <h1 class="title">Schiffe versenken</h1>
+    <h1 class="title">Schiffsse versenken</h1>
   </div>
   <div class="header-items flex flex-all gap-5 m-l-auto">
     {#each Items as Item}
-      <h3><a href={Item.path.toString()}>{Item.item_name}</a></h3>
+      <h3><a href={"./" + Item.path.toString()}>{Item.item_name.toString()}</a></h3>
     {/each}
   </div>
 </div>
 
 <style>
   #top-header {
-    background-color: #e7e7e7;
+    background-color: #d3d3d4;
     border-bottom: 2px solid #cdcdcd;
     padding: 0 20px;
     height: inherit;

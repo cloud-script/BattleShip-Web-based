@@ -12,8 +12,13 @@ import SocketsHandler from './sockets-handler';
 import type { Action } from 'src/dto/game.dto';
 import { Events } from 'src/dto/game.dto';
 import { Socket } from 'net';
+import { callbackify } from 'util';
 
-@WebSocketGateway({ namespace: 'game' })
+// Current cors --> localhost:8080
+@WebSocketGateway({
+  namespace: 'game',
+  cors: { origin: 'http://localhost:8080' },
+})
 export class GameGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
@@ -23,6 +28,11 @@ export class GameGateway
       x: action.x,
       y: action.y,
     });
+  }
+
+  @SubscribeMessage('connect_with')
+  handlePlayerConnect(client, code: String)  {
+    
   }
 
   handleConnection(socket: any | Socket) {
