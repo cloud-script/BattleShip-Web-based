@@ -2,6 +2,7 @@
 import type { Player } from 'src/dto/game.dto';
 
 export default class InvitesHandler {
+  private static invites = new Set<{ player: Player; code: String }>();
   private static invites_collection: { player: Player; code: String }[] = [];
 
   public static store_invite(player: Player, code: String) {
