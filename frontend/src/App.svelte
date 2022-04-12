@@ -1,9 +1,10 @@
 <script lang="ts">
+  // Svelte navigator
   import { Router, Route } from "svelte-navigator";
-
+  // Top-Bottom
   import TopHeader from "./layout_components/top_header.layout.svelte";
   import Footer from "./layout_components/footer.layout.svelte";
-
+  // Pages
   import HomePage from "./layout_components/pages/home.page.svelte";
   import JoinPage from "./layout_components/pages/join.page.svelte";
   import QueuePage from "./layout_components/pages/queue.page.svelte";

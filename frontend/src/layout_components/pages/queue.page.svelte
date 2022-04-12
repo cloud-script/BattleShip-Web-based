@@ -1,44 +1,17 @@
 <script lang="ts">
-  // Svelte classes
-  import { onMount } from "svelte";
   // Types
   import type { Player } from "../../dto/game.dto";
   // Intern classes
   import SocketsHandler from "../../utility/sockets";
-  // Extern module
-  import Axios from "axios";
   // Exports
   export let code: String = undefined;
   // Vars
-  const selfe: Player = { name: "", token: "" };
+  const selfe: Player = { name: "Niggi", token: "lol" };
   let Sockets: SocketsHandler;
-  $: opponent_player = { name: "", token: "" };
-  $: ready = false;
+  //let opponent_player: Player;
 
   // Functionality
-  async function find_opponent() {
-    await Axios({
-      method: "POST",
-      url: "http://localhost:13124/invite/find",
-      data: { code: code },
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((data) => {
-        opponent_player = data.data;
-        ready = true;
-      })
-      .catch((error_msg: Error) => {
-        console.error(error_msg.message);
-        throw new Error();
-      });
-  }
-
-  onMount(() => {
-    if (code) {
-      Sockets = new SocketsHandler("game");
-      console.info(Sockets.connecToOpponent(code));
-    } else Sockets = new SocketsHandler("game");
-  });
+  Sockets = new SocketsHandler("game", selfe, code === undefined);
 </script>
 
 <div class="flex gap-5">
@@ -50,9 +23,9 @@
     <h2 style:font-weight="500">3</h2>
   </div>
   <div>
-    {#await find_opponent()}
+    {#await Sockets.findOpponent(code)}
       <h3>Loading...</h3>
-    {:then}
+    {:then opponent_player}
       <h3>{opponent_player.name}</h3>
     {:catch}
       <h3>Ups, something went wrong :(</h3>

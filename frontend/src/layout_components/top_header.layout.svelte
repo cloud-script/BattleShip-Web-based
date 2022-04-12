@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Link } from "svelte-navigator";
   import type { HeaderItems_obj } from "../Types";
   import VrLine from "./vr_line.layout.svelte";
 
@@ -14,7 +13,7 @@
   </div>
   <div class="header-items flex flex-all gap-5 m-l-auto">
     {#each Items as Item}
-      <h3><a href={"./" + Item.path.toString()}>{Item.item_name.toString()}</a></h3>
+      <h3><a href={"../" + Item.path.toString()}>{Item.item_name.toString()}</a></h3>
     {/each}
   </div>
 </div>
