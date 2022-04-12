@@ -1,13 +1,17 @@
-import { BadRequestException } from '@nestjs/common';
+// Types
 import type { Socket } from 'socket.io';
+import type { Player } from 'src/dto/game.dto';
+// Errors
+import { BadRequestException } from '@nestjs/common';
 
 export default class SocketsHandler {
+  private static sockets = new Set<{ socket: Socket; player: Player }>();
   private static sockets_collection: Socket[] = [];
 
-  private static existsSocket(player_id: String): Boolean {
+  private static existsSocket(socket_id: String): Boolean {
     return (
       this.sockets_collection.find(
-        (client) => client.player_id === player_id,
+        (client) => client.player_id === socket_id,
       ) !== undefined
     );
   }
@@ -27,7 +31,10 @@ export default class SocketsHandler {
     });
   }
 
-  public static emitTo(socket: Socket, event: String, data: any) {
+  // Finisci sta cazzata su via
+  public static registerPlayer(socket_id: String, player: Player) {}
+
+  public static emitTo(dest_player_id: String, event: String, data: any) {
     if (this.sockets_collection.find((client) => client.id === player_id)) {
       socket.emit(event.toString(), data);
     } else throw new BadRequestException();
