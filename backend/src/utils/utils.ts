@@ -1,4 +1,3 @@
-
 export async function sleep(msec: number): Promise<any> {
   return new Promise((resolve) => setTimeout(resolve, msec));
 }
@@ -12,4 +11,8 @@ export function randString(length: number): String {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;
+}
+
+export function randomInt(max: number, min = 0): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
