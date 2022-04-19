@@ -5,51 +5,74 @@ import {
   WebSocketGateway,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 // Handlers
 import SocketsHandler from './game.sockets-handler';
 // Types
-import type { Action, Player } from 'src/dto/game.dto';
+import type {
+  Action,
+  Player,
+  ActionCallBack,
+  FirstRequest,
+} from 'src/dto/game.dto';
 import type { Socket } from 'socket.io';
-// Enumerators
-import { Events } from 'src/Enumerators/events.enums';
-// Current cors --> localhost:8080
+// Enums
+import { Events } from 'src/enumerators/events.enums';
+import { randomInt } from 'src/utils/utils';
 
 @WebSocketGateway({
   namespace: 'game',
-  cors: { origin: 'http://localhost:8080' },
+  cors: { origin: '*' },
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @SubscribeMessage('events')
-  handleEvent(@MessageBody() action: Action) {
-    /*  SocketsHandler.emitTo(action.destination_id, Events.HIT, {
-      x: action.x,
-      y: action.y,
-    });*/
+  @SubscribeMessage(Events.Action)
+  handle_action(@MessageBody() action: Action) {
+    SocketsHandler.emitTo(action.destination_id, Events.Action, action.raw_pos);
   }
 
-  @SubscribeMessage('connect_with')
+  @SubscribeMessage(Events.ActionStatus)
+  handle_action_status(@MessageBody() callback: ActionCallBack) {
+    const destination_id = callback.destination_id;
+    delete callback.destination_id;
+    SocketsHandler.emitTo(destination_id, Events.ActionStatus, callback);
+  }
+
+  @SubscribeMessage(Events.Connect)
   handle_player_connect(
-    @MessageBody() request: { player: Player; dest_player_id: String },
+    @MessageBody() request: { player: Player; connect_id: String },
   ) {
-    SocketsHandler.emitTo(request.dest_player_id, Events.Connect, {
-      player: request.player,
-      socket_id: 'socket.id',
-    });
+    SocketsHandler.emitTo(request.connect_id, Events.Accept, request.player);
   }
 
-  @SubscribeMessage('register_player')
+  @SubscribeMessage(Events.Register)
   register_player(
-    @MessageBody() request: { player: Player; socket_id: String },
+    @MessageBody() player: Player,
+    @ConnectedSocket() socket: Socket,
   ) {
-    SocketsHandler.registerPlayer(request.socket_id, request.player);
+    SocketsHandler.registerPlayer(socket.id, player);
   }
 
-  handleConnection(socket: Socket) {
+  @SubscribeMessage(Events.AmIFirst)
+  random_first(@MessageBody() firstRequest: FirstRequest) {
+    const random_first = randomInt(1);
+    SocketsHandler.emitTo(
+      firstRequest.client_id,
+      Events.AmIFirst,
+      random_first === 1,
+    );
+    SocketsHandler.emitTo(
+      firstRequest.host_id,
+      Events.AmIFirst,
+      random_first === 0,
+    );
+  }
+
+  handleConnection(@ConnectedSocket() socket: Socket) {
     SocketsHandler.addSocket(socket);
   }
 
-  handleDisconnect(socket: Socket) {
+  handleDisconnect(@ConnectedSocket() socket: Socket) {
     SocketsHandler.removeClient(socket.id);
   }
 }
