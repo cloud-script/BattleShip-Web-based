@@ -7,8 +7,8 @@
   // Pages
   import HomePage from "./layout_components/pages/home.page.svelte";
   import JoinPage from "./layout_components/pages/join.page.svelte";
-  import QueuePage from "./layout_components/pages/queue.page.svelte";
-  import GamePage from "./layout_components/pages/game.page.svelte";
+  import QueuePage from "./layout_components/pages/game/queue.page.svelte";
+  import GamePage from "./layout_components/pages/game/game.page.svelte";
 </script>
 
 <Router>
@@ -22,10 +22,7 @@
     <div id="content" class="flex flex-all">
       <Route path="/" component={HomePage} />
       <Route path="/join" component={JoinPage} />
-      <Route path="/queue" component={QueuePage} />
-      <Route path="/queue/:code" let:params>
-        <QueuePage code={params.code} />
-      </Route>
+      <Route path="/queue"  component={QueuePage} />
       <Route path="/game">
         <GamePage fieldSizeX={7} fieldSizeY={12} />
       </Route>
