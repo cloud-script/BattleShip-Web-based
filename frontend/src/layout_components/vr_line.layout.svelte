@@ -4,6 +4,7 @@
   export let color: String = "black";
   export let borderRadius: String = "10%";
   export let hide: Boolean = false;
+  export let space: String = "0"
 </script>
 
 <div
@@ -12,4 +13,5 @@
   style:background-color={color}
   style:border-radius={borderRadius}
   style:display={hide ? "none" : "block"}
+  style:margin={`0 ${space}`}
 />
