@@ -3,9 +3,8 @@ import { io, Socket } from "socket.io-client";
 // Event Emitter
 import { eventEmitter } from "./EventEmitter";
 // DTO's & Enums
-import type { ActionCallBack, Player } from "../dto/game.dto";
+import type { ActionCallBack, Player, ShipType } from "../dto/game.dto";
 import { ActionStatus, Events } from "../enumerators/events.enums";
-import type { Ship } from "../enumerators/game.enums";
 
 export default class PlayerSocket {
   public events: any;
@@ -15,7 +14,6 @@ export default class PlayerSocket {
   private selfe: Player;
   private opponent: Player;
   private current_callback: ActionCallBack;
-  private current_block_pos: number;
   private isFirst: Boolean;
 
   constructor(namespace: String, selfe: Player, is_host: Boolean) {
@@ -69,8 +67,8 @@ export default class PlayerSocket {
     return this.opponent.name || "not found";
   }
 
-  public emitStatus(actionStatus: ActionStatus, sink: { ship_name: Ship } | false = false) {
-    this.socket.emit(Events.ActionStatus, { action_status: actionStatus, destination_id: this.opponent.token, sink: sink });
+  public emitStatus(actionStatus: ActionStatus, sink: { ship_name: ShipType } | false = false, has_lost: Boolean = false) {
+    this.socket.emit(Events.ActionStatus, { action_status: actionStatus, destination_id: this.opponent.token, sink: sink, lost: has_lost });
   }
 
   private connectWith(connect_id: String) {
@@ -104,7 +102,11 @@ export default class PlayerSocket {
     this.socket.on(Events.Action, (block_id: number) => this.events.emit("ping", block_id));
     this.socket.on(Events.ActionStatus, (callback: ActionCallBack) => (this.current_callback = callback));
     this.socket.on(Events.AmIFirst, (result: Boolean) => (this.isFirst = result));
-    this.socket.on(Events.Disconnect, () => alert("Opponent disconnected!"));
+    this.socket.on(Events.Disconnect, () => this.events.emit(Events.Disconnect));
     this.is_ready = true;
+  }
+
+  public closeSocket() {
+    this.socket.disconnect();
   }
 }
