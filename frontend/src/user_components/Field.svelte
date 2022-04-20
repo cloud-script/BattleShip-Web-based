@@ -6,16 +6,17 @@
   // DO
   import type PlayerSocket from "../utility/PlayerSocket";
   // Enums & Types & Constants
-  import { ActionStatus } from "../enumerators/events.enums";
+  import { ActionStatus, Events } from "../enumerators/events.enums";
   import type { Allies, Positions } from "../do/game.do";
   import { ABC } from "../enumerators/game.constant";
-  import type { Ship } from "../enumerators/game.enums";
+  import type { ShipType } from "../dto/game.dto";
   // Exports
   export let socket: PlayerSocket = undefined;
   export let sizeX: number, sizeY: number;
   export let allies_field_array: Array<Array<Number>>;
   export let allies: Allies = undefined,
-    opponent_ships: Array<Ship> = undefined;
+    opponent_ships: Array<ShipType> = undefined;
+  export let winner: Boolean = undefined;
   // Vars
   let ready_move: Boolean = false;
   // Functionality
@@ -63,10 +64,11 @@
           target.appendChild(createImageEle("miss"));
         } else {
           if (callback.sink) {
-            const sank_ship_name = callback.sink.ship_name;
-            console.info(sank_ship_name);
-            console.table(callback);
-            opponent_ships = opponent_ships.filter((ship: any) => ship !== sank_ship_name);
+            opponent_ships[opponent_ships.indexOf(callback.sink.ship_name)] = `${callback.sink.ship_name}.`;
+          }
+          if (callback.lost) {
+            winner = true;
+            socket.closeSocket();
           }
           target.appendChild(createImageEle("hit"));
         }
@@ -87,12 +89,16 @@
     }
   }
 
-  const get_ship_name = (x: number, y: number): Ship | String => {
-    return allies ? allies.find((allie: { positions: Positions; name: Ship }) => allie.positions.find((position) => position.x === x && position.y === y)).name : "";
+  const get_ship_name = (x: number, y: number): ShipType => {
+    return allies ? allies.find((allie: { positions: Positions; name: ShipType }) => allie.positions.find((position) => position.x === x && position.y === y)).name : "";
   };
 
-  const isShip = (block: any): Boolean => {
+  const is_ship = (block: any): Boolean => {
     return block === 1;
+  };
+
+  const has_lost = (): Boolean => {
+    return allies.find((ship) => ship.positions.length > 0) === undefined;
   };
 
   onMount(async () => {
@@ -102,9 +108,8 @@
         const block: any = document.getElementsByClassName("block")[block_id];
         if (block) {
           if (block.className.includes("allie")) {
-            const hit_ship_name = block.dataset.name;
             let found_pos = 0;
-            let sink_callback: false | { ship_name: any }  = false;
+            const hit_ship_name: ShipType = block.dataset.name;
             const ship_array = allies
               .find((ship, index) => {
                 if (ship.name === hit_ship_name) {
@@ -115,17 +120,23 @@
               .positions.slice(1);
             allies[found_pos].positions = ship_array;
 
-            if (ship_array.length === 0) {
-              allies = allies.filter((ship) => ship.name !== hit_ship_name);
-              sink_callback = { ship_name: hit_ship_name };
-            }
             block.style["background-color"] = "#3e3d5259";
-            socket.emitStatus(ActionStatus.HIT, sink_callback);
+            socket.emitStatus(ActionStatus.HIT, ship_array.length === 0 ? { ship_name: hit_ship_name } : false, has_lost());
           } else {
             socket.emitStatus(ActionStatus.MISS);
           }
           block.appendChild(createImageEle("miss"));
-          ready_move = true;
+          if (!has_lost()) ready_move = true;
+          else {
+            socket.closeSocket();
+            winner = false;
+          }
+        }
+      });
+
+      socket.events.on(Events.Disconnect, () => {
+        if (winner === undefined) {
+          alert("You'r opponent disconnected!");
         }
       });
     }
@@ -150,7 +161,7 @@
           {#each rows as _, colIndex}
             {@const Block = allies_field_array[rowIndex][colIndex]}
             <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-            <div class="block flex-col gap-1 flex-all" data-x={rowIndex} data-y={colIndex} data-name={isShip(Block) ? get_ship_name(rowIndex, colIndex) : ""} class:allie={isShip(Block)} on:mouseover={show_block_interactions} on:mouseleave={hide_block_interactions}>
+            <div class="block flex-col gap-1 flex-all" data-x={rowIndex} data-y={colIndex} data-name={is_ship(Block) ? get_ship_name(rowIndex, colIndex) : ""} class:allie={is_ship(Block)} on:mouseover={show_block_interactions} on:mouseleave={hide_block_interactions}>
               <button class="hit-btn" on:click={hit}>HIT</button>
               <button class="mark-btn" on:click={mark}>MARK</button>
             </div>
