@@ -33,7 +33,25 @@ h4 {
 }
 
 button {
+  background-color: #4350a9;
   cursor: pointer;
+  color: #e4e4e4;
+  padding: 5px;
+  outline: none;
+  border: 0;
+  font-weight: 600;
+  border-radius: 2.5px;
+  transition: background-color 150ms ease;
+}
+
+button:hover {
+  background-color: #5360b3;
+}
+
+button:focus {
+  background-color: #5360b3;
+  border: none;
+  outline: none;
 }
 
 .title {
